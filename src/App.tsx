@@ -96,9 +96,7 @@ import { CheckoutSection } from './sections/CheckoutSection';
 
 // --- Context ---
 
-export const API_URL = import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('railway.app') 
-  ? import.meta.env.VITE_API_URL 
-  : '';
+export const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const AuthContext = React.createContext<{
   isLoggedIn: boolean;
