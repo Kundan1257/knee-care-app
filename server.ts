@@ -42,12 +42,44 @@ async function startServer() {
 
     app.use(cors());
     app.use(express.json());
+    
+    // Request Logger
+    app.use((req, res, next) => {
+      console.log(`LOG: [${req.method}] ${req.path}`);
+      next();
+    });
 
+    // API Routes
+    app.get("/api/health", (req, res) => {
+      console.log("LOG: [Health] Checked");
+      res.json({ status: "Backend is healthy", time: new Date().toISOString() });
+    });
+
+    // Mount Auth Router - simplified and direct
+    console.log("LOG: [Server] Mounting Auth Routes at /api/auth");
+    
+    // Safety check for the import
+    const finalAuthRouter = (authRoutes as any).default || authRoutes;
+    if (typeof finalAuthRouter === "function" || finalAuthRouter?.post) {
+      app.use("/api/auth", finalAuthRouter);
+    } else {
+      console.error("LOG ERROR: [Server] Invalid authRoutes router ❌");
+    }
+
+    app.use("/api/payment", paymentRoutes);
+
+    // Get Razorpay Key ID for client
+    app.get("/api/razorpay-key", (req, res) => {
+      res.json({ keyId: process.env.RAZORPAY_KEY_ID || "" });
+    });
+
+    const publicPath = path.join(process.cwd(), "public");
+    
     // Explicitly serve manifest.json with correct Content-Type to fix PWA issues
     app.get("/manifest.json", (req, res) => {
-      const filePath = path.resolve(__dirname, "public", "manifest.json");
       res.header("Content-Type", "application/json; charset=utf-8");
-      res.sendFile(filePath, (err) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.sendFile(path.join(publicPath, "manifest.json"), (err) => {
         if (err) {
           console.error("LOG ERROR: [Manifest] Failed to serve manifest.json", err);
           res.status(404).send("Manifest not found");
@@ -57,22 +89,17 @@ async function startServer() {
 
     // Explicitly serve sw.js for PWA
     app.get("/sw.js", (req, res) => {
-      const filePath = path.resolve(__dirname, "public", "sw.js");
       res.header("Content-Type", "application/javascript; charset=utf-8");
-      res.sendFile(filePath);
+      res.header("Service-Worker-Allowed", "/");
+      res.sendFile(path.join(publicPath, "sw.js"), (err) => {
+        if (err) {
+          res.status(404).send("SW not found");
+        }
+      });
     });
 
-    // Serve public folder static files (like icons)
-    app.use(express.static(path.resolve(__dirname, "public")));
-
-    // API Routes
-    app.use("/api/auth", authRoutes);
-    app.use("/api/payment", paymentRoutes);
-
-    // Get Razorpay Key ID for client
-    app.get("/api/razorpay-key", (req, res) => {
-      res.json({ keyId: process.env.RAZORPAY_KEY_ID || "" });
-    });
+    // Serve public folder static files as early as possible
+    app.use(express.static(publicPath));
 
     // Vite middleware for development
     if (process.env.NODE_ENV !== "production") {
@@ -90,9 +117,21 @@ async function startServer() {
       const distPath = path.join(process.cwd(), "dist");
       app.use(express.static(distPath));
       app.get("*", (req, res) => {
+        // Only handle GET requests for SPA fallback
         res.sendFile(path.join(distPath, "index.html"));
       });
     }
+
+    // Custom 404 handler for API and non-matched routes
+    app.use((req, res) => {
+      console.log(`LOG ERROR: [404] ${req.method} ${req.path}`);
+      res.status(404).json({ 
+        error: "Route not found", 
+        method: req.method, 
+        path: req.path,
+        suggestion: "Verify API_URL configuration and route definitions"
+      });
+    });
 
     // Start listening
     app.listen(Number(PORT), "0.0.0.0", () => {

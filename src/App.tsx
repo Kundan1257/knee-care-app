@@ -96,7 +96,7 @@ import { CheckoutSection } from './sections/CheckoutSection';
 
 // --- Context ---
 
-export const API_URL = import.meta.env.VITE_API_URL || '';
+export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 export const AuthContext = React.createContext<{
   isLoggedIn: boolean;
@@ -161,22 +161,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         if (currentToken) {
           await refreshUser();
         } else {
-          // Simple auto-login for demo if no session
-          const res = await fetch(`${API_URL}/api/auth/auto-login`, { method: 'POST' });
-          if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('token', data.token);
-            if (data.user_id) {
-              localStorage.setItem('user_id', data.user_id);
-            }
-            setToken(data.token);
-            await refreshUser();
-          } else {
-            console.error("Auto login failed with status:", res.status);
-          }
+          // Auto-login disabled temporarily to fix 404 issues in production
+          console.log("LOG: [Auth] Auto-login request skipped (Manual override) 🛡️");
+          // Proceed as guest/unauthenticated without crash
         }
       } catch (e) {
-        console.error("Auth initialization failed:", e);
+        console.error("LOG ERROR: [Auth] Initialization check failed:", e);
       } finally {
         setIsLoading(false);
       }

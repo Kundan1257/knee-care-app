@@ -3,10 +3,15 @@ import { dbStatus } from "../lib/db";
 import { generateToken, verifyToken, AuthRequest } from "../middleware/auth";
 import User from "../models/User";
 
-const router = express.Router();
+const authRouter = express.Router();
+
+// Health check for auth router
+authRouter.get("/status", (req, res) => {
+  res.json({ status: "Auth router is active", timestamp: new Date().toISOString() });
+});
 
 // Register / Login (Simplified for this app)
-router.post("/login", async (req, res) => {
+authRouter.post("/login", async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -58,18 +63,18 @@ router.post("/login", async (req, res) => {
 });
 
 // Auto Login / Anonymous Session
-router.post("/auto-login", async (req, res) => {
+authRouter.post("/auto-login", async (req, res) => {
+  console.log("LOG: [Auth] Matched POST /api/auth/auto-login");
   try {
     const user_id = "user_" + Date.now();
     const token = generateToken({ user_id });
     
-    // DB Check - log but don't block guest session
-    if (!dbStatus.isConnected) {
-      console.log("DB Disconnected - Proceeding with Guest Session");
-      return res.json({ success: true, token, user_id, isGuest: true });
-    }
-
-    res.json({ success: true, token, user_id });
+    return res.json({ 
+      success: true, 
+      token, 
+      user_id,
+      user: null
+    });
   } catch (error: any) {
     console.error("LOG ERROR: [Auth] Auto-login flow critically failed:", error.message);
     res.status(500).json({ error: "Auto-login failed" });
@@ -77,7 +82,7 @@ router.post("/auto-login", async (req, res) => {
 });
 
 // Get profile
-router.get("/me", verifyToken, async (req: AuthRequest, res) => {
+authRouter.get("/me", verifyToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.user_id;
     if (!userId) {
@@ -117,4 +122,5 @@ router.get("/me", verifyToken, async (req: AuthRequest, res) => {
   }
 });
 
-export default router;
+export { authRouter as authRoutes };
+export default authRouter;
