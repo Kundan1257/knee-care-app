@@ -88,7 +88,7 @@ async function startServer() {
     });
 
     // Explicitly serve PWA icons
-    const pwaIcons = ["icon-192-v2.png", "icon-512-v2.png"];
+    const pwaIcons = ["icon-192.png", "icon-512.png"];
     pwaIcons.forEach(icon => {
       app.get(`/${icon}`, (req, res) => {
         res.header("Content-Type", "image/png");
