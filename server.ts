@@ -77,7 +77,7 @@ async function startServer() {
     
     // Explicitly serve manifest.json with correct Content-Type to fix PWA issues
     app.get("/manifest.json", (req, res) => {
-      res.header("Content-Type", "application/json; charset=utf-8");
+      res.header("Content-Type", "application/manifest+json; charset=utf-8");
       res.header("Access-Control-Allow-Origin", "*");
       res.sendFile(path.join(publicPath, "manifest.json"), (err) => {
         if (err) {
@@ -87,13 +87,40 @@ async function startServer() {
       });
     });
 
+    // Explicitly serve PWA icons
+    const pwaIcons = ["icon-192-v2.png", "icon-512-v2.png"];
+    pwaIcons.forEach(icon => {
+      app.get(`/${icon}`, (req, res) => {
+        res.header("Content-Type", "image/png");
+        res.header("Access-Control-Allow-Origin", "*");
+        // Try serving from publicPath first, then distPath as fallback
+        const filePath = path.join(publicPath, icon);
+        res.sendFile(filePath, (err) => {
+          if (err) {
+            const distPath = path.join(process.cwd(), "dist");
+            res.sendFile(path.join(distPath, icon), (err2) => {
+              if (err2) {
+                console.error(`LOG ERROR: [Icons] Failed to serve ${icon} from both public and dist`, err2);
+                res.status(404).send("Icon not found");
+              }
+            });
+          }
+        });
+      });
+    });
+
     // Explicitly serve sw.js for PWA
     app.get("/sw.js", (req, res) => {
       res.header("Content-Type", "application/javascript; charset=utf-8");
       res.header("Service-Worker-Allowed", "/");
       res.sendFile(path.join(publicPath, "sw.js"), (err) => {
         if (err) {
-          res.status(404).send("SW not found");
+          const distPath = path.join(process.cwd(), "dist");
+          res.sendFile(path.join(distPath, "sw.js"), (err2) => {
+            if (err2) {
+              res.status(404).send("SW not found");
+            }
+          });
         }
       });
     });
