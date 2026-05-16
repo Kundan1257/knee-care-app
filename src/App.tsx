@@ -279,20 +279,16 @@ const Navbar = () => {
               ))}
             </nav>
             
-            <div className="ml-4 pl-4 border-l border-gray-100 flex items-center gap-4">
-              {isLoggedIn ? (
+            {isLoggedIn && (
+              <div className="ml-4 pl-4 border-l border-gray-100 flex items-center gap-4">
                 <button 
                   onClick={logout}
                   className="w-10 h-10 bg-red-50 text-red-400 rounded-full flex items-center justify-center hover:bg-red-100 transition-all shadow-sm"
                 >
                   <X size={18} />
                 </button>
-              ) : (
-                <Link to="/help" className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center text-accent hover:bg-accent hover:text-primary transition-all border border-accent/20 shadow-sm">
-                  <Star size={18} fill="currentColor" />
-                </Link>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
