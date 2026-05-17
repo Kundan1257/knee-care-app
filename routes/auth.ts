@@ -3,7 +3,7 @@ import { dbStatus } from "../lib/db";
 import { generateToken, verifyToken, AuthRequest } from "../middleware/auth";
 import User from "../models/User";
 
-const authRouter = express.Router();
+export const authRouter = express.Router();
 
 // Health check for auth router
 authRouter.get("/status", (req, res) => {
@@ -63,12 +63,21 @@ authRouter.post("/login", async (req, res) => {
 });
 
 // Auto Login / Anonymous Session
+authRouter.get("/auto-login", (req, res) => {
+  res.status(405).json({ 
+    error: "Method Not Allowed", 
+    suggestion: "Please use POST for auto-login",
+    details: "This endpoint is designed for automated anonymous sessions via POST."
+  });
+});
+
 authRouter.post("/auto-login", async (req, res) => {
-  console.log("LOG: [Auth] Matched POST /api/auth/auto-login");
+  console.log("LOG: [Auth] Matched POST /api/auth/auto-login 🔑");
   try {
-    const user_id = "user_" + Date.now();
+    const user_id = "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4);
     const token = generateToken({ user_id });
     
+    console.log(`LOG: [Auth] Auto-login generated token for: ${user_id} ✅`);
     return res.json({ 
       success: true, 
       token, 
@@ -122,5 +131,4 @@ authRouter.get("/me", verifyToken, async (req: AuthRequest, res) => {
   }
 });
 
-export { authRouter as authRoutes };
 export default authRouter;

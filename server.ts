@@ -11,13 +11,10 @@ import cors from "cors";
 import mongoose from "mongoose";
 
 // Routes
-import authRoutes from "./routes/auth";
-import paymentRoutes from "./routes/payment";
+import { authRouter } from "./routes/auth";
+import { paymentRouter } from "./routes/payment";
 
 import { connectDB, dbStatus } from "./lib/db";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Global Error Handlers to prevent process crashes
 process.on("unhandledRejection", (reason, promise) => {
@@ -34,9 +31,6 @@ async function startServer() {
   try {
     console.log("LOG: [Server] Starting application...");
     
-    // Connect to database before starting the server
-    await connectDB();
-    
     const app = express();
     const PORT = process.env.PORT || 3000;
 
@@ -49,24 +43,38 @@ async function startServer() {
       next();
     });
 
-    // API Routes
+    // API Routes - Health Check FIRST
+    console.log("LOG: [Server] Registering /api/health");
     app.get("/api/health", (req, res) => {
-      console.log("LOG: [Health] Checked");
-      res.json({ status: "Backend is healthy", time: new Date().toISOString() });
+      console.log("LOG: [Health] Checked ✅");
+      res.json({ 
+        status: "Backend is healthy", 
+        db: dbStatus.isConnected ? "Connected" : "Disconnected",
+        time: new Date().toISOString(),
+        env: process.env.NODE_ENV || "development",
+        version: "1.0.5", // Explicit version to track deployments
+        port: PORT
+      });
     });
 
-    // Mount Auth Router - simplified and direct
-    console.log("LOG: [Server] Mounting Auth Routes at /api/auth");
-    
-    // Safety check for the import
-    const finalAuthRouter = (authRoutes as any).default || authRoutes;
-    if (typeof finalAuthRouter === "function" || finalAuthRouter?.post) {
-      app.use("/api/auth", finalAuthRouter);
-    } else {
-      console.error("LOG ERROR: [Server] Invalid authRoutes router ❌");
-    }
+    // Test route
+    app.get("/api/ping", (req, res) => {
+      res.json({ message: "pong", timestamp: new Date().toISOString(), version: "1.0.5" });
+    });
 
-    app.use("/api/payment", paymentRoutes);
+    // Mount Auth Router
+    console.log("LOG: [Server] Mounting Auth Router at /api/auth");
+    app.use("/api/auth", (req, res, next) => {
+      console.log(`LOG: [Auth Proxy] ${req.method} ${req.path}`);
+      next();
+    }, authRouter);
+
+    // Mount Payment Router
+    console.log("LOG: [Server] Mounting Payment Router at /api/payment");
+    app.use("/api/payment", (req, res, next) => {
+      console.log(`LOG: [Payment Proxy] ${req.method} ${req.path}`);
+      next();
+    }, paymentRouter);
 
     // Get Razorpay Key ID for client
     app.get("/api/razorpay-key", (req, res) => {
@@ -129,12 +137,16 @@ async function startServer() {
     app.use(express.static(publicPath));
 
     // Vite middleware for development
-    if (process.env.NODE_ENV !== "production") {
+    const isProd = process.env.NODE_ENV === "production";
+    console.log(`LOG: [Server] Environment: ${isProd ? "PRODUCTION" : "DEVELOPMENT"}`);
+
+    if (!isProd) {
+      console.log("LOG: [Server] Initializing Vite Middleware...");
       const vite = await createViteServer({
         server: { 
           middlewareMode: true,
           hmr: process.env.DISABLE_HMR === 'true' ? false : {
-            overlay: false, // Ensure no overlay even if partially enabled
+            overlay: false, 
           },
         },
         appType: "spa",
@@ -142,28 +154,60 @@ async function startServer() {
       app.use(vite.middlewares);
     } else {
       const distPath = path.join(process.cwd(), "dist");
+      console.log(`LOG: [Server] Serving static files from: ${distPath}`);
       app.use(express.static(distPath));
       app.get("*", (req, res) => {
-        // Only handle GET requests for SPA fallback
+        // Essential: Allow /api routes to fall through to the custom 404 handler
+        // If the path starts with /api, we should not serve index.html
+        if (req.path.startsWith("/api/")) {
+          console.warn(`LOG WARN: [404] API route not found: ${req.method} ${req.path}`);
+          return res.status(404).json({
+            error: "API endpoint not found",
+            path: req.path,
+            method: req.method,
+            tip: "Check route registration in server.ts and path correctness."
+          });
+        }
         res.sendFile(path.join(distPath, "index.html"));
       });
     }
 
     // Custom 404 handler for API and non-matched routes
     app.use((req, res) => {
-      console.log(`LOG ERROR: [404] ${req.method} ${req.path}`);
+      console.log(`LOG ERROR: [404 Fallback] ${req.method} ${req.path}`);
       res.status(404).json({ 
-        error: "Route not found", 
+        error: "Resource not found", 
         method: req.method, 
         path: req.path,
-        suggestion: "Verify API_URL configuration and route definitions"
+        env: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
       });
+    });
+
+    // Connect to database in the background or await it if critical
+    // We'll initiate it here but not let it block the listen if possible
+    console.log("LOG: [Server] Initiating database connection...");
+    connectDB().then(() => {
+      console.log("LOG: [Server] Database connected successfully ✅");
+    }).catch(err => {
+      console.error("LOG ERROR: [Server] Database connection failed during background init:", err.message);
     });
 
     // Start listening
     app.listen(Number(PORT), "0.0.0.0", () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`LOG: [Server] Server listening on 0.0.0.0:${PORT} 🚀`);
+      
+      // Log registered routes for verification
+      console.log("LOG: [Server] Registered Routes:");
+      app._router.stack.forEach((r: any) => {
+        if (r.route && r.route.path) {
+          console.log(` - ${Object.keys(r.route.methods).join(',').toUpperCase()} ${r.route.path}`);
+        } else if (r.name === 'router') {
+          console.log(` - ROUTER MOUNTED @ ${r.regexp}`);
+        }
+      });
     });
+
   } catch (error: any) {
     console.error("LOG ERROR: [Server] Startup failed ❌");
     console.error(error.message);

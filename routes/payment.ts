@@ -6,7 +6,16 @@ import { verifyToken, AuthRequest } from "../middleware/auth";
 
 import User from "../models/User";
 
-const router = express.Router();
+export const paymentRouter = express.Router();
+
+// Health check for payment router
+paymentRouter.get("/status", (req, res) => {
+  res.json({ 
+    status: "Payment router is active", 
+    razorpayConfigured: !!process.env.RAZORPAY_KEY_ID && !!process.env.RAZORPAY_KEY_SECRET,
+    timestamp: new Date().toISOString() 
+  });
+});
 
 let razorpay: Razorpay | null = null;
 
@@ -34,7 +43,7 @@ const getRazorpay = () => {
 };
 
 // 2. BACKEND: CREATE ORDER API
-router.post("/create-order", verifyToken, async (req: AuthRequest, res) => {
+paymentRouter.post("/create-order", verifyToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.user_id;
     if (!userId) {
@@ -86,7 +95,7 @@ router.post("/create-order", verifyToken, async (req: AuthRequest, res) => {
 });
 
 // 3. RAZORPAY PAYMENT VERIFICATION
-router.post("/verify-payment", verifyToken, async (req: AuthRequest, res) => {
+paymentRouter.post("/verify-payment", verifyToken, async (req: AuthRequest, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -146,7 +155,7 @@ router.post("/verify-payment", verifyToken, async (req: AuthRequest, res) => {
 });
 
 // 4. PREMIUM ACCESS PROTECTION
-router.get("/premium-content", verifyToken, async (req: AuthRequest, res) => {
+paymentRouter.get("/premium-content", verifyToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.user_id;
 
@@ -175,4 +184,4 @@ router.get("/premium-content", verifyToken, async (req: AuthRequest, res) => {
   }
 });
 
-export default router;
+export default paymentRouter;

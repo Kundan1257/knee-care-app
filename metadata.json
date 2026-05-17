@@ -1,5 +1,6 @@
 {
   "name": "Knee-Care",
   "description": "Biomechanical guidance and stability routines for long-term joint health and natural knee support.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

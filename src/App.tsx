@@ -96,7 +96,30 @@ import { CheckoutSection } from './sections/CheckoutSection';
 
 // --- Context ---
 
-export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+// Dynamically determine the API URL. 
+// If VITE_API_URL is provided, use it. 
+// Otherwise, use an empty string to denote relative paths (calling the same origin).
+const getApiUrl = () => {
+  // Respect user-provided env var first
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    return envUrl.replace(/\/$/, '');
+  }
+  
+  // Default to relative paths for same-origin backend
+  return '';
+};
+
+export const API_URL = getApiUrl();
+console.log(`LOG: [Config] Using API_URL: "${API_URL || 'RELATIVE (same origin)'}"`);
+
+// Connectivity self-check
+if (typeof window !== 'undefined') {
+  fetch(`${API_URL}/api/health`)
+    .then(r => r.json())
+    .then(data => console.log("LOG: [API] Connectivity check successful ✅", data))
+    .catch(err => console.warn("LOG: [API] Connectivity check failed (Expected if backend starting) ⚠️", err));
+}
 
 export const AuthContext = React.createContext<{
   isLoggedIn: boolean;
@@ -156,17 +179,46 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     const initAuth = async () => {
-      const currentToken = localStorage.getItem('token');
+      let currentToken = localStorage.getItem('token');
+      console.log("LOG: [Auth] Initializing auth state... 🔑");
+      
       try {
         if (currentToken) {
           await refreshUser();
+          // Re-check token after refresh attempt (refreshUser might have cleared it)
+          currentToken = localStorage.getItem('token');
+        }
+        
+        if (!currentToken) {
+          const targetUrl = `${API_URL}/api/auth/auto-login`;
+          console.log(`LOG: [Auth] Token missing/invalid, attempting anonymous auto-login to: ${targetUrl} ... ⚡`);
+          
+          try {
+            // Diagnostic ping to check backend connectivity
+            const pingRes = await fetch(`${API_URL}/api/health`).catch(e => ({ ok: false, status: 'Network Error' }));
+            console.log(`LOG: [Auth] Diagnostic ping /api/health result:`, pingRes.ok ? "SUCCESS ✅" : `FAILED ❌ (${pingRes.status})`);
+
+            const res = await fetch(targetUrl, { 
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.token) {
+                console.log("LOG: [Auth] Anonymous auto-login successful ✅");
+                login(data.token, data.user || { user_id: data.user_id, isPremium: false });
+              }
+            } else {
+              console.warn(`LOG: [Auth] Auto-login response not OK: ${res.status} for ${targetUrl}`);
+            }
+          } catch (err) {
+            console.error("LOG: [Auth] Auto-login fetch failed:", err);
+          }
         } else {
-          // Auto-login disabled temporarily to fix 404 issues in production
-          console.log("LOG: [Auth] Auto-login request skipped (Manual override) 🛡️");
-          // Proceed as guest/unauthenticated without crash
+          console.log("LOG: [Auth] Session restored successfully ✅");
         }
       } catch (e) {
-        console.error("LOG ERROR: [Auth] Initialization check failed:", e);
+        console.error("LOG ERROR: [Auth] Initialization flow failed:", e);
       } finally {
         setIsLoading(false);
       }
