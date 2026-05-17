@@ -44,7 +44,8 @@ async function startServer() {
     });
 
     // API Routes - Health Check FIRST
-    console.log("LOG: [Server] Registering /api/health");
+    console.log("LOG: [Server] Registering core API routes...");
+    
     app.get("/api/health", (req, res) => {
       console.log("LOG: [Health] Checked ✅");
       res.json({ 
@@ -52,29 +53,59 @@ async function startServer() {
         db: dbStatus.isConnected ? "Connected" : "Disconnected",
         time: new Date().toISOString(),
         env: process.env.NODE_ENV || "development",
-        version: "1.0.5", // Explicit version to track deployments
+        version: "1.0.8", // Incremented version
         port: PORT
       });
     });
 
-    // Test route
+    // Diagnostically list all routes
+    app.get("/api/routes", (req, res) => {
+      const routes: string[] = [];
+      app._router.stack.forEach((r: any) => {
+        if (r.route && r.route.path) {
+          routes.push(`${Object.keys(r.route.methods).join(',').toUpperCase()} ${r.route.path}`);
+        } else if (r.name === 'router') {
+           // Handle nested routers (simplified)
+           routes.push(`ROUTER mounted at ${r.regexp}`);
+        }
+      });
+      res.json({ routes });
+    });
+
     app.get("/api/ping", (req, res) => {
-      res.json({ message: "pong", timestamp: new Date().toISOString(), version: "1.0.5" });
+      res.json({ message: "pong", timestamp: new Date().toISOString(), version: "1.0.8" });
+    });
+
+    // Temporary diagnostic route
+    app.get("/api/test123", (req, res) => {
+      console.log("LOG: [Test123] Route hit ✅");
+      res.json({
+        success: true,
+        message: "TEST ROUTE ACTIVE",
+        timestamp: new Date().toISOString(),
+        version: "1.0.8"
+      });
     });
 
     // Mount Auth Router
     console.log("LOG: [Server] Mounting Auth Router at /api/auth");
-    app.use("/api/auth", (req, res, next) => {
-      console.log(`LOG: [Auth Proxy] ${req.method} ${req.path}`);
-      next();
-    }, authRouter);
+    app.use("/api/auth", authRouter);
 
     // Mount Payment Router
     console.log("LOG: [Server] Mounting Payment Router at /api/payment");
-    app.use("/api/payment", (req, res, next) => {
-      console.log(`LOG: [Payment Proxy] ${req.method} ${req.path}`);
-      next();
-    }, paymentRouter);
+    app.use("/api/payment", paymentRouter);
+
+    // API 404 Handler - If it reaches here, no API route matched
+    app.use("/api", (req, res) => {
+      console.warn(`LOG WARN: [404 API] No route matched for ${req.method} ${req.originalUrl}`);
+      res.status(404).json({
+        error: "API endpoint not found",
+        method: req.method,
+        path: req.originalUrl,
+        tip: "This is a custom JSON 404. If you see this, the server IS RUNNING but the route is not registered.",
+        version: "1.0.8"
+      });
+    });
 
     // Get Razorpay Key ID for client
     app.get("/api/razorpay-key", (req, res) => {
