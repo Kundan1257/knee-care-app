@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "server.ts",
+    "vite.config.ts",
+    "routes/**/*",
+    "middleware/**/*",
+    "lib/**/*",
+    "models/**/*",
+    "src/**/*"
+  ]
+}

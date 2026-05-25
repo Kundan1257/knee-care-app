@@ -1,0 +1,17 @@
+{
+  "name": "Knee-Care | Premium Knee Rehabilitation Portal",
+  "short_name": "Knee-Care",
+  "description": "Premium clinical knee rehabilitation portal with physical therapy protocol tracker, pain intensity telemetry, and secure VIP coaching enrollment.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
