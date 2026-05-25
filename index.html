@@ -1,32 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Knee-Care | Premium Knee Rehabilitation Portal</title>
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0d9488">
-  <!-- FontAwesome for medical icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Razorpay Checkout Script -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
-  <div id="root"></div>
-  
-  <!-- Main application script bundle linkage -->
-  <script type="module" src="/src/main.tsx"></script>
-
-  <!-- Service Worker PWA registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((reg) => console.log('LOG: [PWA] Service Worker registered successfully ✅', reg.scope))
-          .catch((err) => console.warn('LOG WARN: [PWA] Service Worker registration failed ❌', err));
-      });
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knee-Care | Daily Knee Health & Prevention</title>
+    <link rel="icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <meta name="theme-color" content="#1E3A34">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
 

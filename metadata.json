@@ -1,1 +1,6 @@
-{"name":"Knee-Care","description":"Premium clinical knee rehabilitation portal with physical therapy protocol tracker, pain intensity telemetry, and secure VIP coaching enrollment.","requestFramePermissions":[],"majorCapabilities":["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]}
+{
+  "name": "Knee-Care",
+  "description": "Biomechanical guidance and stability routines for long-term joint health and natural knee support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

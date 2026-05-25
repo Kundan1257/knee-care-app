@@ -1,51 +1,134 @@
 import express from "express";
-import jwt from "jsonwebtoken"; // Ensure jsonwebtoken is imported to safely peek at tokens
+import { dbStatus } from "../lib/db";
+import { generateToken, verifyToken, AuthRequest } from "../middleware/auth";
+import User from "../models/User";
 
 export const authRouter = express.Router();
 
-authRouter.post("/login", (req, res) => {
-  const userId = "user_1779170551728_wmgk";
-  res.json({
-    token: "dummy_jwt_token_123",
-    user: {
-      user_id: userId,
-      isPremium: true
-    }
-  });
+// Health check for auth router
+authRouter.get("/status", (req, res) => {
+  res.json({ status: "Auth router is active", timestamp: new Date().toISOString() });
 });
 
-// 💡 ROBUST PROFILE RECOVERY ENDPOINT
-// We handle token inspection manually here instead of forcing hard middleware rejection
-authRouter.get("/me", (req, res) => {
+// Register / Login (Simplified for this app)
+authRouter.post("/login", async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const { email } = req.body;
 
-    if (!token) {
-      // 🟢 Return explicit JSON for unauthenticated visitors instead of throwing an error
-      return res.json({
-        user_id: "user_guest_123456789",
-        isPremium: false,
-        authenticated: false
-      });
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
     }
 
-    const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    
-    return res.json({
-      user_id: decoded.userId || "user_1779170551728_wmgk",
-      isPremium: decoded.isPremium || true,
-      authenticated: true
-    });
-  } catch (err) {
-    // If a token is corrupt or expired, fall back to guest JSON cleanly
-    return res.json({
-      user_id: "user_guest_123456789",
-      isPremium: false,
-      authenticated: false,
-      sessionExpired: true
-    });
+    // DB Check
+    if (!dbStatus.isConnected) {
+      return res.status(503).json({ error: "Database Service Unavailable" });
+    }
+
+    try {
+      // Check if user exists or create new
+      let user = await User.findOne({ email });
+      
+      if (!user) {
+        const user_id = "user_" + Math.random().toString(36).substr(2, 9);
+        user = await User.create({ email, user_id });
+      }
+
+      const token = generateToken({ user_id: user.user_id });
+
+      return res.json({ 
+        token, 
+        user: { 
+          email: user.email, 
+          user_id: user.user_id,
+          isPremium: user.isPremium 
+        } 
+      });
+    } catch (dbError: any) {
+      console.error("Login database operation failed:", dbError.message);
+      const user_id = "guest_" + Math.random().toString(36).substr(2, 5);
+      const token = generateToken({ user_id });
+      return res.json({ 
+        token, 
+        user: { 
+          email, 
+          user_id,
+          isPremium: false 
+        } 
+      });
+    }
+  } catch (error: any) {
+    console.error("Login Error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// Auto Login / Anonymous Session
+authRouter.get("/auto-login", (req, res) => {
+  res.status(405).json({ 
+    error: "Method Not Allowed", 
+    suggestion: "Please use POST for auto-login",
+    details: "This endpoint is designed for automated anonymous sessions via POST."
+  });
+});
+
+authRouter.post("/auto-login", async (req, res) => {
+  console.log("LOG: [Auth] Matched POST /api/auth/auto-login 🔑");
+  try {
+    const user_id = "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4);
+    const token = generateToken({ user_id });
+    
+    console.log(`LOG: [Auth] Auto-login generated token for: ${user_id} ✅`);
+    return res.json({ 
+      success: true, 
+      token, 
+      user_id,
+      user: null
+    });
+  } catch (error: any) {
+    console.error("LOG ERROR: [Auth] Auto-login flow critically failed:", error.message);
+    res.status(500).json({ error: "Auto-login failed" });
+  }
+});
+
+// Get profile
+authRouter.get("/me", verifyToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.user_id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized: No user info in token" });
+    }
+
+    // DB Check
+    if (!dbStatus.isConnected) {
+      return res.status(503).json({ error: "Database Service Unavailable" });
+    }
+
+    try {
+      const user = await User.findOne({ user_id: userId });
+      
+      if (!user) {
+        return res.json({ user_id: userId, isPremium: false, isGuest: true }); // Return guest state instead of 404
+      }
+
+      res.json({ 
+        user_id: user.user_id, 
+        email: user.email || "guest@example.com",
+        isPremium: user.isPremium,
+        isGuest: !user.email
+      });
+    } catch (dbError: any) {
+      console.error("Database query failed, returning fallback:", dbError.message);
+      return res.json({ 
+        user_id: userId, 
+        email: "guest@example.com",
+        isPremium: false,
+        isGuest: true 
+      });
+    }
+  } catch (error: any) {
+    console.error(`LOG ERROR: [Auth] Profile fetch failed:`, error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+export default authRouter;
