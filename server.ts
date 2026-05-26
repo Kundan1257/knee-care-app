@@ -34,7 +34,28 @@ async function startServer() {
     const app = express();
     const PORT = process.env.PORT || 3000;
 
-    app.use(cors());
+    // PRODUCTION CORS CONFIGURATION
+    const allowedOrigins = [
+      "https://vercel.app",
+      "http://localhost:3000",
+      "http://localhost:8080"
+    ];
+
+    app.use(cors({
+      origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+          return callback(null, true);
+        } else {
+          console.warn(`LOG WARN: [CORS] Blocked request from unauthorized origin: ${origin}`);
+          return callback(new Error("Not allowed by CORS security policies"));
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+    }));
+
     app.use(express.json());
     
     // Request Logger
