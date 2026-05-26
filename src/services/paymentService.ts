@@ -1,4 +1,4 @@
-import { API_URL } from '../App';
+const getServiceApiUrl = () => { const envUrl = import.meta.env.VITE_API_URL; return (envUrl && envUrl.trim() !== '') ? envUrl.replace(/\/$/, '') : ''; }; const API_URL = getServiceApiUrl();
 
 export interface RazorpayOrder {
   id: string;
