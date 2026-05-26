@@ -113,6 +113,14 @@ async function startServer() {
     // Mount Payment Router
     console.log("LOG: [Server] Mounting Payment Router at /api/payment");
     app.use("/api/payment", paymentRouter);
+    // 🎯 RAZORPAY CONFIGURATION DELIVERY ENDPOINT
+    app.get("/api/razorpay-key", (req, res) => {
+      console.log("LOG: [Server] Delivering valid Razorpay Key configuration payload ✅");
+      res.json({ 
+        keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_SrtSV2J4ngtpfL" 
+      });
+    });
+
 
     // API 404 Handler - If it reaches here, no API route matched
     app.use("/api", (req, res) => {
