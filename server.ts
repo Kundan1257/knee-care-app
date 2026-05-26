@@ -34,27 +34,25 @@ async function startServer() {
     const app = express();
     const PORT = process.env.PORT || 3000;
 
-    // PRODUCTION CORS CONFIGURATION
-    const allowedOrigins = [
-      "https://vercel.app",
-      "http://localhost:3000",
-      "http://localhost:8080"
-    ];
+    // PLACE THIS AT THE VERY TOP OF MIDDLEWARES, DIRECTLY BELOW EXPRESS INITIALIZATION
+    app.use((req, res, next) => {
+      const origin = req.headers.origin;
+      const allowedOrigins = ["https://knee-care-app.vercel.app", "http://localhost:3000", "http://localhost:8080"];
+      
+      if (origin && (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app"))) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+      }
+      
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
 
-    app.use(cors({
-      origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
-          return callback(null, true);
-        } else {
-          console.warn(`LOG WARN: [CORS] Blocked request from unauthorized origin: ${origin}`);
-          return callback(new Error("Not allowed by CORS security policies"));
-        }
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
-    }));
+      // 🎯 CRITICAL PREFLIGHT INTERCEPT: Instantly approve all OPTIONS queries with a clean 204 No Content status
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+      }
+      next();
+    });
 
     app.use(express.json());
     
