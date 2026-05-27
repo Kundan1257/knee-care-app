@@ -77,12 +77,15 @@ class PaymentService {
    */
   async createOrder(token: string): Promise<RazorpayOrder> {
     const res = await fetch(`${API_URL}/api/payment/create-order`, {
-      method: 'POST',
+            method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+        // 🚀 THE FINAL PIECE: Bulletproof token injection to unblock Render's verification guard
+        'Authorization': `Bearer ${token || localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({ amount: 49900, currency: "INR" })
     });
+
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
