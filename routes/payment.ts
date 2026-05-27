@@ -1,7 +1,7 @@
 import express from "express";
-import { Razorpay } from "razorpay";
 import crypto from "crypto";
-
+const Razorpay = require("razorpay");
+import { verifyToken, AuthRequest } from "../middleware/auth";
 import { dbStatus } from "../lib/db";
 import { verifyToken, AuthRequest } from "../middleware/auth";
 
