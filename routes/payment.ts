@@ -1,6 +1,7 @@
 import express from "express";
-import crypto from "crypto";
-import Razorpay from "razorpay";
+ximport crypto from "crypto";
+import { Razorpay } from "razorpay";
+
 import { dbStatus } from "../lib/db";
 import { verifyToken, AuthRequest } from "../middleware/auth";
 
