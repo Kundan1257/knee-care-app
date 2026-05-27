@@ -20,14 +20,15 @@ paymentRouter.get("/status", (req, res) => {
 let razorpay: Razorpay | null = null;
 
 const getRazorpay = () => {
-  if (!razorpay) {
-    const key_id = process.env.RAZORPAY_KEY_ID;
-    const key_secret = process.env.RAZORPAY_KEY_SECRET;
-    
-    if (!key_id || !key_secret) {
-      return null;
-    }
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+  
+  if (!key_id || !key_secret) {
+    console.error("LOG ERROR: [Payment] Keys missing from process.env inside getRazorpay!");
+    return null;
+  }
 
+  if (!razorpay) {
     if (key_id.startsWith('rzp_test_')) {
       console.log("LOG: [Payment] Razorpay initialized in TEST MODE ✅");
     } else {
@@ -36,11 +37,13 @@ const getRazorpay = () => {
     
     razorpay = new Razorpay({
       key_id: key_id,
-      key_secret: key_secret,
+      key_secret: key_secret
     });
   }
   return razorpay;
 };
+
+  
 
 // 2. BACKEND: CREATE ORDER API
 paymentRouter.post("/create-order", verifyToken, async (req: AuthRequest, res) => {

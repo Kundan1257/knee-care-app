@@ -86,8 +86,7 @@ class PaymentService {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || `Order creation failed with status ${res.status}`);
-    }
+      throw new Error(errorData.error || `Order creation failed with status ${res.status}`)    }
 
     const data = await res.json();
     if (!data.success || !data.order) {
