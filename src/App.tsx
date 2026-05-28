@@ -876,7 +876,7 @@ const ContactPage = () => (
   <PageWrapper>
     <header className="mb-24 text-center mt-10">
       <h1 className="text-5xl font-black text-primary mb-6 tracking-tighter">Connect with Us</h1>
-      <p className="text-gray-400 font-medium max-w-xl mx-auto text-xl leading-relaxed">Our support network is here to guide your recovery journey.</p>
+      <p className="text-gray-400 font-medium max-w-xl mx-auto text-xl leading-relaxed">Our support network is here to guide your joint prevention and longevity journey.</p>
     </header>
 
     <Section title="Direct Assistance">
