@@ -389,7 +389,7 @@ export const ExerciseSection: React.FC = () => {
                 {isPremium ? <Activity size={28} /> : <Lock size={28} />}
               </div>
               <div className="text-left">
-                <h2 className="text-3xl font-bold text-primary group-hover:text-accent transition-colors tracking-tight">Recovery Protocols</h2>
+                <h2 className="text-3xl font-bold text-primary group-hover:text-accent transition-colors tracking-tight">Advanced Prevention Protocols</h2>
                 {!isPremium ? (
                   <div className="inline-flex items-center gap-1.5 mt-1 bg-accent/10 px-2 py-0.5 rounded-lg">
                     <span className="text-[10px] text-accent font-black uppercase tracking-widest">Premium Resource</span>
@@ -436,7 +436,7 @@ export const ExerciseSection: React.FC = () => {
           {!isPremium && (
             <div className="absolute inset-x-0 bottom-0 top-[100px] bg-gradient-to-t from-white via-white/80 to-transparent flex flex-col items-center justify-center pointer-events-none p-12">
               <div className="bg-primary text-secondary px-8 py-4 rounded-[2rem] text-sm font-bold shadow-2xl flex items-center gap-3">
-                <Activity size={20} className="text-accent" /> Unlock Recovery Protocols
+                <Activity size={20} className="text-accent" /> Unlock Advanced Prevention Protocols
               </div>
               <p className="text-gray-400 text-xs font-bold mt-4 uppercase tracking-widest">Premium Membership Required</p>
             </div>
