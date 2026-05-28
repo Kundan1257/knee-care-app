@@ -857,7 +857,15 @@ const PrivacyPolicyPage = () => (
           </p>
         </div>
         <div className="p-8 bg-primary text-secondary rounded-[2.5rem]">
-          <p className="font-black text-center text-sm uppercase tracking-[0.3em]">Integrity Guaranteed</p>
+          <p className="font-black text-center text-sm uppercase tracking-[0.3em]">Integrity Guaranteed
+
+        {/* 🔐 GLOBAL REGULATORY COMPLIANCE BADGES */}
+        <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap gap-3 text-[10px] uppercase font-bold tracking-widest text-text/40">
+          <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5">GDPR Compliant</span>
+          <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5">CCPA Protected</span>
+          <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5">Zero-Log Architecture</span>
+        </div>
+  </p>
         </div>
       </Card>
     </Section>
