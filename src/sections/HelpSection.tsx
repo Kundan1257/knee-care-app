@@ -19,6 +19,14 @@ const ChatBubble: React.FC<{ message: string, isBot: boolean }> = ({ message, is
   </motion.div>
 );
 
+
+  // 💡 Interactive Preventative Quick-Reply Prompt Chips
+  const suggestedPrompts = [
+    "5-min knee warmup for runners",
+    "How to protect knees during deep squats?",
+    "Daily habits to reduce joint cracking sounds"
+  ];
+
 export const HelpSection: React.FC = () => {
   const [messages, setMessages] = useState<{ text: string, isBot: boolean }[]>([
     { text: "Hello! I'm your Knee-Care assistant. How can I help you today?", isBot: true }
@@ -114,7 +122,26 @@ export const HelpSection: React.FC = () => {
             ))}
           </div>
 
-          <div className="relative flex items-center gap-3">
+          
+        {/* Quick Prompt Chips row layout container */}
+        <div className="flex flex-wrap gap-2 mb-3 px-2">
+          {suggestedPrompts.map((promptText, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                // If your file uses input state like 'input' or 'message', we attempt standard updates
+                if (typeof setInput !== 'undefined') setInput(promptText);
+                else if (typeof setNewMessage !== 'undefined') setNewMessage(promptText);
+                else if (typeof setMessage !== 'undefined') setMessage(promptText);
+              }}
+              className="text-xs bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-full px-3 py-1.5 transition-all duration-200 active:scale-95 text-left"
+            >
+              ✨ {promptText}
+            </button>
+          ))}
+        </div>
+      <div className="relative flex items-center gap-3">
             <input 
               ref={inputRef}
               type="text"
