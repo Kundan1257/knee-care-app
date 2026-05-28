@@ -119,7 +119,7 @@ export const HomeSection: React.FC = () => {
         </motion.div>
 
         <motion.div variants={item}>
-          <Section title="Recovery Tips" subtitle="Optimize your structural healing response.">
+          <Section title="Joint Protection Tips" subtitle="Optimize your structural joint longevity.">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card className="bg-blue-50/30 border-blue-100 shadow-none p-10 rounded-[3rem] hover:bg-blue-50/60 transition-all duration-500">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -162,7 +162,7 @@ export const HomeSection: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-[0.6em] text-accent mb-2 block">Consistency is Key</span>
-                      <h3 className="text-4xl md:text-5xl font-black text-primary tracking-tighter">Your Recovery Journey</h3>
+                      <h3 className="text-4xl md:text-5xl font-black text-primary tracking-tighter">Your Prevention Journey</h3>
                     </div>
                   </div>
                   <p className="text-gray-400 font-medium text-2xl mb-16 leading-[1.6] max-w-2xl">
