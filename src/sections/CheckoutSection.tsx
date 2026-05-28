@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, usePremium } from '../hooks/useAuth';
 import { paymentService } from '../services/paymentService';
 
-export const CheckoutSection: React.FC = () => {
+export const CheckoutSection = () => {
+  const [region, setRegion] = React.useState<'SA' | 'US' | 'EU'>('SA');
   const { user, token, updateUser } = useAuth();
   const isPremium = usePremium();
   const navigate = useNavigate();
