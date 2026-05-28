@@ -153,7 +153,7 @@ export const PremiumSection: React.FC = () => {
 
           <div className="mb-12">
             <h3 className="text-4xl font-black text-primary mb-3 tracking-tighter leading-tight">Structural <br />Integrity Plan</h3>
-            <p className="text-gray-400 font-medium text-lg">Your foundation for years of painless movement.</p>
+            <p className="text-gray-400 font-medium text-lg">Your foundation for years of fluid, stable, and resilient movement.</p>
           </div>
 
           <div className="mb-12 bg-muted p-10 rounded-[3rem] border border-border/50 flex flex-col gap-2 relative overflow-hidden group">
