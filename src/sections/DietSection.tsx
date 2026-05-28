@@ -107,7 +107,7 @@ export const DietSection: React.FC = () => {
         <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-accent/20">
           <Utensils size={14} /> Structural Nutrition
         </div>
-        <h1 className="text-4xl font-black text-primary mb-4 tracking-tight">Recovery Fuel</h1>
+        <h1 className="text-4xl font-black text-primary mb-4 tracking-tight">Joint Preservation Fuel</h1>
         <p className="text-gray-500 font-medium max-w-lg mx-auto text-lg leading-relaxed">Optimize your biochemistry with foods that reduce inflammation and build collagen.</p>
       </header>
 
@@ -137,13 +137,13 @@ export const DietSection: React.FC = () => {
 
         <div className="space-y-6">
           <div className="px-4 mb-4">
-            <h3 className="text-xs font-black text-accent uppercase tracking-[0.3em]">Phase 2: Repair</h3>
+            <h3 className="text-xs font-black text-accent uppercase tracking-[0.3em]">Phase 2: Joint Shielding</h3>
           </div>
           <div className="space-y-2">
             <NutritionItem 
               icon={Egg} 
               title="Amino Reconstruction" 
-              description="High-density proteins provide the literal bricks for cartilaginous repair and muscle synthesis." 
+              description="High-density proteins provide the literal bricks for cartilaginous preservation and muscle synthesis." 
             />
             <NutritionItem 
               icon={Coffee} 
@@ -170,7 +170,7 @@ export const DietSection: React.FC = () => {
                 {isPremium ? <Utensils size={28} /> : <Lock size={28} />}
               </div>
               <div className="text-left">
-                <h2 className="text-3xl font-black text-primary group-hover:text-accent transition-colors tracking-tight">Recovery Recipes</h2>
+                <h2 className="text-3xl font-black text-primary group-hover:text-accent transition-colors tracking-tight">Anti-Inflammatory Recipes</h2>
                 {!isPremium ? (
                   <div className="inline-flex items-center gap-1.5 mt-1 bg-accent/10 px-2 py-0.5 rounded-lg">
                     <span className="text-[10px] text-accent font-black uppercase tracking-widest">Premium Resource</span>
