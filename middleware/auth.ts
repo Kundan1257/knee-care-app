@@ -1,9 +1,13 @@
 import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 
+// 🔐 EXPORT AUTHREQUEST DIRECTLY AS A STANDARD CLASS INTERFACE
 export interface AuthRequest extends Request {
-  user?: { user_id: string };
+  userId?: string;
 }
+
+
+
 
 export function generateToken(user: any) {
   const secret = process.env.JWT_SECRET;
