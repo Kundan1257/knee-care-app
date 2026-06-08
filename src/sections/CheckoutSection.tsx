@@ -24,7 +24,8 @@ export const CheckoutSection: React.FC = () => {
       console.log(`Initiating checkout pipeline to backend for region tracking: ${region} (${currencyCode})`);
 
       // 2. Query your live active Node/Express backend configuration architecture
-      const response = await fetch("http://localhost:8080/api/payment/create-order", {
+      const response = await fetch("https://onrender.com", {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
