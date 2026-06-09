@@ -37,5 +37,38 @@ authRouter.get("/me", verifyToken as any, (async (req: any, res: Response) => {
     });
   }
 }) as any);
+// NEW ANONYMOUS AUTO-LOGIN ENDPOINT
+authRouter.post("/auto-login", (async (req: any, res: Response) => {
+  try {
+    // 1. Create a brand new anonymous guest user in your database
+    const guestUser = new User({
+      isPremium: false
+      // You can leave email empty or omit it if your model allows it,
+      // which flags them as an anonymous guest user profile.
+    });
+
+    await guestUser.save();
+
+    // 2. Generate an authorization token using your existing middleware utility
+    const userIdString = (guestUser._id || guestUser.id).toString();
+    const token = generateToken(userIdString);
+
+    // 3. Return the token and user details to the frontend
+    return res.status(200).json({
+      success: true,
+      token: token,
+      user: {
+        user_id: userIdString,
+        email: "guest@example.com",
+        isPremium: false,
+        isGuest: true
+      }
+    });
+
+  } catch (error: any) {
+    console.error("Auto-login pipeline exception:", error.message || error);
+    return res.status(500).json({ error: "Failed to initialize secure auto-login session" });
+  }
+}) as any);
 
 export default authRouter;
