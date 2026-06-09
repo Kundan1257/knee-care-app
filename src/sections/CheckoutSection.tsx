@@ -14,28 +14,30 @@ export const CheckoutSection: React.FC = () => {
     EU: { amount: 899, label: '€8.99 EUR', symbol: '€' }
   };
 
-      const handlePaymentSubmit = () => {
-    try {
-      setIsProcessing(true);
-      console.log(`Redirecting securely to Razorpay Hosted Checkout for region: ${region}`);
+      // ADD THE 'async' KEYWORD RIGHT HERE
+const handlePaymentSubmit = async () => {
+  try {
+    setIsProcessing(true);
+    console.log(`Redirecting securely to Razorpay Hosted Checkout for region: ${region}`);
 
-      if (region === 'SA') {
-        window.location.href = "https://rzp.io";
-      } else if (region === 'US' || region === 'UK') {
-        window.location.href = "https://rzp.io";
-      } else if (region === 'EU') {
-        window.location.href = "https://rzp.io";
-      } else {
-        window.location.href = "https://rzp.io";
-      }
-
-    } catch (routingFault) {
-      console.error("Gateway execution error:", routingFault);
-      alert("Unable to open payment portal.");
-    } finally {
-      setIsProcessing(false);
+    if (region === 'SA') {
+      window.location.href = "https://rzp.io";
+    } else if (region === 'US' || region === 'UK') {
+      window.location.href = "https://rzp.io";
+    } else if (region === 'EU') {
+      window.location.href = "https://rzp.io";
+    } else {
+      window.location.href = "https://rzp.io";
     }
-  };
+
+  } catch (routingFault) {
+    console.error("Gateway execution error:", routingFault);
+    alert("Unable to open payment portal.");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
 
       const orderData = await response.json();
