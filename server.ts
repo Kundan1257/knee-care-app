@@ -103,9 +103,10 @@ async function startServer() {
     });
 
     // Start Listening
-    app.listen(Number(PORT), "0.0.0.0", () => {
-      console.log(`LOG: [Server] Server listening on 0.0.0.0:${PORT} 🚀`);
-    });
+    app.listen(Number(PORT), () => {
+  console.log(`LOG: [Server] Server listening on port ${PORT} 🚀`);
+});
+
 
   } catch (error: any) {
     console.error("LOG ERROR: [Server] Startup failed ❌");
