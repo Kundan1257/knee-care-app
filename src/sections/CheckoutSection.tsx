@@ -14,27 +14,29 @@ export const CheckoutSection: React.FC = () => {
     EU: { amount: 899, label: '€8.99 EUR', symbol: '€' }
   };
 
-    const handlePaymentSubmit = async () => {
+      const handlePaymentSubmit = () => {
     try {
       setIsProcessing(true);
-      
-      // 1. Determine dynamic currency track parameters based on your state selection
-      const currencyCode = region === "US" || region === "UK" ? "USD" : "INR";
-      
-      console.log(`Initiating checkout pipeline to backend for region tracking: ${region} (${currencyCode})`);
+      console.log(`Redirecting securely to Razorpay Hosted Checkout for region: ${region}`);
 
-      // 2. Query your live active Node/Express backend configuration architecture
-      const response = await fetch("https://onrender.com", {
+      if (region === 'SA') {
+        window.location.href = "https://rzp.io";
+      } else if (region === 'US' || region === 'UK') {
+        window.location.href = "https://rzp.io";
+      } else if (region === 'EU') {
+        window.location.href = "https://rzp.io";
+      } else {
+        window.location.href = "https://rzp.io";
+      }
 
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: "user_" + Date.now(), // Fallback tracking seed string identifier
-          currency: currencyCode,
-        }),
-      });
+    } catch (routingFault) {
+      console.error("Gateway execution error:", routingFault);
+      alert("Unable to open payment portal.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
 
       const orderData = await response.json();
       
