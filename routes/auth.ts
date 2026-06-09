@@ -37,38 +37,46 @@ authRouter.get("/me", verifyToken as any, (async (req: any, res: Response) => {
     });
   }
 }) as any);
-// NEW ANONYMOUS AUTO-LOGIN ENDPOINT
+// UPDATED ANONYMOUS AUTO-LOGIN ENDPOINT WITH UNIQUE UTILITIES
 authRouter.post("/auto-login", (async (req: any, res: Response) => {
   try {
-    // 1. Create a brand new anonymous guest user in your database
+    // Generate a completely unique identifier for this guest session
+    const uniqueId = Math.floor(100000 + Math.random() * 900000);
+    const guestEmail = `guest_${uniqueId}@knee-care.local`;
+    const guestPassword = `Pass_${uniqueId}_${Date.now()}`;
+
+    // Create the guest user filling your model's required fields
     const guestUser = new User({
+      email: guestEmail,
+      password: guestPassword, // If your model hashes passwords, this is fine
       isPremium: false
-      // You can leave email empty or omit it if your model allows it,
-      // which flags them as an anonymous guest user profile.
     });
 
     await guestUser.save();
 
-    // 2. Generate an authorization token using your existing middleware utility
     const userIdString = (guestUser._id || guestUser.id).toString();
     const token = generateToken(userIdString);
 
-    // 3. Return the token and user details to the frontend
     return res.status(200).json({
       success: true,
       token: token,
       user: {
         user_id: userIdString,
-        email: "guest@example.com",
+        email: guestEmail,
         isPremium: false,
         isGuest: true
       }
     });
 
   } catch (error: any) {
-    console.error("Auto-login pipeline exception:", error.message || error);
-    return res.status(500).json({ error: "Failed to initialize secure auto-login session" });
+    // Crucial: This logs the EXACT reason MongoDB rejected it into your Render console!
+    console.error("Auto-login database validation failure details:", error.message || error);
+    return res.status(500).json({ 
+      error: "Failed to initialize secure auto-login session",
+      details: error.message 
+    });
   }
 }) as any);
+
 
 export default authRouter;
