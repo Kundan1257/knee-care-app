@@ -12,13 +12,16 @@ export const CheckoutSection: React.FC = () => {
       console.log(`Redirecting securely to Razorpay Hosted Checkout for region: ${region}`);
 
       if (region === 'SA') {
-        window.location.href = "https://rzp.io";
+        
+        window.location.href = "https://rzp.io/rzp/Js4vsuA3";
       } else if (region === 'US' || region === 'UK') {
-        window.location.href = "https://rzp.io";
+        
+        window.location.href = "https://rzp.io/rzp/hB9oKg0y";
       } else if (region === 'EU') {
-        window.location.href = "https://rzp.io";
+        
+        window.location.href = "https://rzp.io/rzp/mfRJ5uvB";
       } else {
-        window.location.href = "https://rzp.io";
+        window.location.href = "https://rzp.io/rzp/hB9oKg0y";
       }
 
     } catch (routingFault) {
