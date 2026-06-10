@@ -15,7 +15,7 @@ export const CheckoutSection: React.FC = () => {
   };
 
       // ADD THE 'async' KEYWORD RIGHT HERE
-  const handlePaymentSubmit = () => {
+    const handlePaymentSubmit = () => {
     try {
       setIsProcessing(true);
       console.log(`Redirecting securely to Razorpay Hosted Checkout for region: ${region}`);
@@ -37,6 +37,7 @@ export const CheckoutSection: React.FC = () => {
       setIsProcessing(false);
     }
   };
+
 
 
 
